@@ -26,6 +26,8 @@ namespace ColorTabs2019
         private readonly SolutionEvents _solutionEvents;
         private readonly ColorProvider _colorProvider;
 
+        private readonly ConcurrentDictionary<TabItem, object> _headerDict = new();
+
         public Backgrounder(DTE2 dte)
         {
             if (dte is null)
@@ -85,7 +87,26 @@ namespace ColorTabs2019
 
                         if (tabItem.HeaderTemplate == null)
                         {
+                            //this tab already processed
+
+                            //check for its title updated
+                            if (_headerDict.TryGetValue(tabItem, out var header))
+                            {
+                                var headerTextBlock = ((tabItem.Header as StackPanel).Children[1] as TextBlock);
+                                var ourTitle = headerTextBlock.Text;
+                                var originalHeader = GetTabTile(header);
+                                if (ourTitle != originalHeader)
+                                {
+                                    headerTextBlock.Text = originalHeader;
+                                }
+                            }
+
                             continue;
+                        }
+
+                        if (!_headerDict.TryGetValue(tabItem, out _))
+                        {
+                            _headerDict[tabItem] = tabItem.Header;
                         }
 
                         tabItem.HeaderTemplate = null;
@@ -108,7 +129,7 @@ namespace ColorTabs2019
                                     Padding = new Thickness(0),
                                     Margin = new Thickness(5, 0, 0, 0),
                                     Foreground = new SolidColorBrush(General.Instance.Foreground.ToColorFromArgb()), // Brushes.White,
-                                    Text = (tabItem.Header as dynamic)?.Title?.AnnotatedTitle?.ToString() ?? "<< unknown >>"
+                                    Text = GetTabTile(tabItem.Header)
                                 }
                             }
                         };
@@ -167,6 +188,10 @@ namespace ColorTabs2019
             }
         }
 
+        private static dynamic GetTabTile(dynamic tabItemHeader)
+        {
+            return tabItemHeader?.Title?.AnnotatedTitle?.ToString() ?? "<< unknown >>";
+        }
 
     }
 
