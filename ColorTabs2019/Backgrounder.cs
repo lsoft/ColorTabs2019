@@ -281,20 +281,8 @@ namespace ColorTabs2019
                             var hashcode = csprojPath.GetHashCode();
                             var a = (byte)255;
                             var r = (byte)((hashcode & 0x00ff0000) >> 16);
-                            if (r > 200)
-                            {
-                                r /= 2;
-                            }
                             var g = (byte)((hashcode & 0x0000ff00) >> 8);
-                            if (g > 200)
-                            {
-                                g /= 2;
-                            }
                             var b = (byte)((hashcode & 0x000000ff) >> 0);
-                            if (b > 200)
-                            {
-                                b /= 2;
-                            }
                             color = Color.FromArgb(a, r, g, b);
                         }
 
