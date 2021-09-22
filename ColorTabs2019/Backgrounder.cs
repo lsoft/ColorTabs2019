@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -146,7 +147,9 @@ namespace ColorTabs2019
                                     {
                                         Padding = new Thickness(0),
                                         Margin = new Thickness(5, 0, 0, 0),
-                                        Foreground = new SolidColorBrush(General.Instance.Foreground.ToColorFromArgb()), // Brushes.White,
+                                        Foreground = new SolidColorBrush(
+                                            uint.Parse(General.Instance.Foreground, NumberStyles.HexNumber).ToColorFromArgb()
+                                            ),
                                         Text = GetTabTile(tabItem.Header)
                                     }
                                 }

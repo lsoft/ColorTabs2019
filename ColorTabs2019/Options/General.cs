@@ -13,8 +13,8 @@ namespace ColorTabs2019
     {
         [Category("General")]
         [DisplayName("Foreground")]
-        [Description("Foreground color for tab name.")]
-        [DefaultValue(0xFFFFFFFF)]
-        public uint Foreground { get; set; } = 0xFFFFFFFF;
+        [Description("Foreground color for tab name (ARGB in hex).")]
+        [DefaultValue("FFFFFFFF")]
+        public string Foreground { get; set; } = "FFFFFFFF";
     }
 }
