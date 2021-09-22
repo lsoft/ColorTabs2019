@@ -50,141 +50,172 @@ namespace ColorTabs2019
 
         public async Task ScanAsync()
         {
-            var mw = Application.Current.MainWindow;
-
-            var tabListHost = mw.GetRecursiveByName("PART_TabListHost");
-            if (tabListHost == null)
+            try
             {
-                return;
+                const int DefaultWaitTimeout = 1000;
+                const int IncreaseWaitTimeout = 1000;
+
+                var waitTimeout = DefaultWaitTimeout;
+                var mw = Application.Current.MainWindow;
+                FrameworkElement tabListHost = null;
+
+                //search for tab list panel
+                while (true)
+                {
+                    await Task.Delay(waitTimeout, _cts.Token);
+
+                    if (_cts.Token.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
+                    tabListHost = mw.GetRecursiveByName("PART_TabListHost");
+                    if (tabListHost != null)
+                    {
+                        break;
+                    }
+                }
+
+                while (true)
+                {
+                    await Task.Delay(waitTimeout, _cts.Token);
+
+                    if (_cts.Token.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
+                    try
+                    {
+                        var tabs = new List<FrameworkElement>();
+                        tabListHost.GetRecursiveByType("DocumentTabItem", ref tabs);
+
+                        if (tabs.Count <= 0)
+                        {
+                            continue;
+                        }
+
+                        foreach (var tab in tabs)
+                        {
+                            var tabItem = tab as TabItem;
+                            if (tabItem == null)
+                            {
+                                continue;
+                            }
+
+                            if (tabItem.HeaderTemplate == null)
+                            {
+                                //this tab already processed
+
+                                //check for its title updated
+                                if (_headerDict.TryGetValue(tabItem, out var header))
+                                {
+                                    var headerTextBlock = ((tabItem.Header as StackPanel).Children[1] as TextBlock);
+                                    var ourTitle = headerTextBlock.Text;
+                                    var originalHeader = GetTabTile(header);
+                                    if (ourTitle != originalHeader)
+                                    {
+                                        headerTextBlock.Text = originalHeader;
+                                    }
+                                }
+
+                                continue;
+                            }
+
+                            if (!_headerDict.TryGetValue(tabItem, out _))
+                            {
+                                _headerDict[tabItem] = tabItem.Header;
+                            }
+
+                            tabItem.HeaderTemplate = null;
+                            tabItem.Header = new StackPanel
+                            {
+                                Orientation = Orientation.Horizontal,
+                                Children =
+                                {
+                                    new Rectangle
+                                    {
+                                        HorizontalAlignment = HorizontalAlignment.Left,
+                                        VerticalAlignment = VerticalAlignment.Stretch,
+                                        Fill = new SolidColorBrush(_colorProvider.DetermineColor(tabItem)),
+                                        Height = 10,
+                                        Width = 10,
+                                        Margin = new Thickness(0)
+                                    },
+                                    new TextBlock
+                                    {
+                                        Padding = new Thickness(0),
+                                        Margin = new Thickness(5, 0, 0, 0),
+                                        Foreground = new SolidColorBrush(General.Instance.Foreground.ToColorFromArgb()), // Brushes.White,
+                                        Text = GetTabTile(tabItem.Header)
+                                    }
+                                }
+                            };
+
+                            //tabItem.Header = "123";
+
+                            //Style style = new Style(typeof(TabItem));//, tabItem.Style);
+                            //style.Setters.Add(new Setter(TabItem.BackgroundProperty, Brushes.Blue));
+                            ////style.Setters.Add(tabItem.Style.Setters[1]);
+                            //style.Triggers.Add(
+                            //    new Trigger
+                            //    {
+                            //        Property = TabItem.IsMouseDirectlyOverProperty,
+                            //        Value = true,
+                            //        Setters =
+                            //        {
+                            //            new Setter(TabItem.BackgroundProperty, Brushes.Green)
+                            //        }
+                            //    });
+                            //tabItem.Style = style;
+
+                            //var grid = tabItem.GetRecursiveByName("TitlePanel") as Grid;
+                            //if(grid != null)
+                            ////var border = tabItem.GetRecursiveByName("OuterBorder") as Border;
+                            ////if (border != null)
+                            //{
+                            //    string mcontent = (tabItem.Content as dynamic)?.Name?.ToString() ?? string.Empty;
+                            //    if (!string.IsNullOrEmpty(mcontent))
+                            //    {
+                            //        var parts = mcontent.Split('|');
+                            //        if (parts.Length == 5)
+                            //        {
+                            //            var csprojPath = parts[1];
+
+                            //            var hashcode = csprojPath.GetHashCode(); //tabItem.Content.ToString().GetHashCode();
+                            //            var a = (byte)127;
+                            //            var r = (byte)((hashcode & 0x00ff0000) >> 16);
+                            //            var g = (byte)((hashcode & 0x0000ff00) >> 8);
+                            //            var b = (byte)((hashcode & 0x00ff00ff) >> 0);
+                            //            //var color = Color.FromArgb(a, r, g, b);
+                            //            var color = 0x4fa24f.GetColor();
+                            //            //if (!tabItem.IsFocused)
+                            //            {
+                            //                grid.Background = new SolidColorBrush(color);
+                            //            }
+                            //        }
+                            //    }
+                            //}
+                        }
+
+                        //restore timeout if case we're successful
+                        waitTimeout = DefaultWaitTimeout;
+                    }
+                    catch (Exception excp)
+                    {
+                        Logging.LogVS(excp.Message);
+                        Logging.LogVS(excp.StackTrace);
+
+                        //increase timeout to prevent spam into the log
+                        waitTimeout += IncreaseWaitTimeout;
+                    }
+                }
             }
-
-            while (!_cts.Token.IsCancellationRequested)
+            catch (Exception excp)
             {
-                await Task.Delay(1000, _cts.Token);
-
-                if (_cts.Token.IsCancellationRequested)
-                {
-                    return;
-                }
-
-                try
-                {
-                    var tabs = new List<FrameworkElement>();
-                    tabListHost.GetRecursiveByType("DocumentTabItem", ref tabs);
-
-                    if (tabs.Count <= 0)
-                    {
-                        continue;
-                    }
-
-                    foreach (var tab in tabs)
-                    {
-                        var tabItem = tab as TabItem;
-                        if (tabItem == null)
-                        {
-                            continue;
-                        }
-
-                        if (tabItem.HeaderTemplate == null)
-                        {
-                            //this tab already processed
-
-                            //check for its title updated
-                            if (_headerDict.TryGetValue(tabItem, out var header))
-                            {
-                                var headerTextBlock = ((tabItem.Header as StackPanel).Children[1] as TextBlock);
-                                var ourTitle = headerTextBlock.Text;
-                                var originalHeader = GetTabTile(header);
-                                if (ourTitle != originalHeader)
-                                {
-                                    headerTextBlock.Text = originalHeader;
-                                }
-                            }
-
-                            continue;
-                        }
-
-                        if (!_headerDict.TryGetValue(tabItem, out _))
-                        {
-                            _headerDict[tabItem] = tabItem.Header;
-                        }
-
-                        tabItem.HeaderTemplate = null;
-                        tabItem.Header = new StackPanel
-                        {
-                            Orientation = Orientation.Horizontal,
-                            Children =
-                            {
-                                new Rectangle
-                                {
-                                    HorizontalAlignment = HorizontalAlignment.Left,
-                                    VerticalAlignment = VerticalAlignment.Stretch,
-                                    Fill = new SolidColorBrush(_colorProvider.DetermineColor(tabItem)),
-                                    Height = 10,
-                                    Width = 10,
-                                    Margin = new Thickness(0)
-                                },
-                                new TextBlock
-                                {
-                                    Padding = new Thickness(0),
-                                    Margin = new Thickness(5, 0, 0, 0),
-                                    Foreground = new SolidColorBrush(General.Instance.Foreground.ToColorFromArgb()), // Brushes.White,
-                                    Text = GetTabTile(tabItem.Header)
-                                }
-                            }
-                        };
-
-                        //tabItem.Header = "123";
-
-                        //Style style = new Style(typeof(TabItem));//, tabItem.Style);
-                        //style.Setters.Add(new Setter(TabItem.BackgroundProperty, Brushes.Blue));
-                        ////style.Setters.Add(tabItem.Style.Setters[1]);
-                        //style.Triggers.Add(
-                        //    new Trigger
-                        //    {
-                        //        Property = TabItem.IsMouseDirectlyOverProperty,
-                        //        Value = true,
-                        //        Setters =
-                        //        {
-                        //            new Setter(TabItem.BackgroundProperty, Brushes.Green)
-                        //        }
-                        //    });
-                        //tabItem.Style = style;
-
-                        //var grid = tabItem.GetRecursiveByName("TitlePanel") as Grid;
-                        //if(grid != null)
-                        ////var border = tabItem.GetRecursiveByName("OuterBorder") as Border;
-                        ////if (border != null)
-                        //{
-                        //    string mcontent = (tabItem.Content as dynamic)?.Name?.ToString() ?? string.Empty;
-                        //    if (!string.IsNullOrEmpty(mcontent))
-                        //    {
-                        //        var parts = mcontent.Split('|');
-                        //        if (parts.Length == 5)
-                        //        {
-                        //            var csprojPath = parts[1];
-
-                        //            var hashcode = csprojPath.GetHashCode(); //tabItem.Content.ToString().GetHashCode();
-                        //            var a = (byte)127;
-                        //            var r = (byte)((hashcode & 0x00ff0000) >> 16);
-                        //            var g = (byte)((hashcode & 0x0000ff00) >> 8);
-                        //            var b = (byte)((hashcode & 0x00ff00ff) >> 0);
-                        //            //var color = Color.FromArgb(a, r, g, b);
-                        //            var color = 0x4fa24f.GetColor();
-                        //            //if (!tabItem.IsFocused)
-                        //            {
-                        //                grid.Background = new SolidColorBrush(color);
-                        //            }
-                        //        }
-                        //    }
-                        //}
-                    }
-                }
-                catch (Exception excp)
-                {
-                    Debug.WriteLine(excp.Message);
-                    Debug.WriteLine(excp.StackTrace);
-                }
+                Logging.LogVS("STOP ERROR");
+                Logging.LogVS(excp.Message);
+                Logging.LogVS(excp.StackTrace);
             }
         }
 
