@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <Extern href="stdidcmd.h"/>
+  <Extern href="vsshlids.h"/>
+  <Include href="KnownImageIds.vsct"/>
+  <Include href="VSGlobals.vsct"/>
+
+  <Commands package="ColorTabs2019">
+  </Commands>
+
+  <Symbols>
+    <GuidSymbol name="ColorTabs2019" value="{2045cd66-6f9f-496b-b377-32f99ad6eaeb}">
+      
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>
