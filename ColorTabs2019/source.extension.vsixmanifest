@@ -4,9 +4,10 @@
         <Identity Id="ColorTabs2019.25f93d89-e99f-4dc7-bbfc-fe37aaaad86e" Version="1.4" Language="en-US" Publisher="lsoft" />
         <DisplayName>Color Tabs 2019</DisplayName>
         <Description xml:space="preserve">Color Tabs Extension for Visual Studio 2019.</Description>
+        <MoreInfo>https://github.com/lsoft/ColorTabs2019</MoreInfo>
+        <License>LICENSE.txt</License>
+        <Icon>logo.png</Icon>
         <Preview>true</Preview>
-        <!--    <Icon>Resources\Icon.png</Icon>
-    <PreviewImage>Resources\Icon.png</PreviewImage> -->
     </Metadata>
     <Installation>
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[16.11, 17.0)" />
