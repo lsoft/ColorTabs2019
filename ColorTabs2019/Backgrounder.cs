@@ -58,36 +58,25 @@ namespace ColorTabs2019
 
                 var waitTimeout = DefaultWaitTimeout;
                 var mw = Application.Current.MainWindow;
-                FrameworkElement tabListHost = null;
 
                 //search for tab list panel
                 while (true)
                 {
-                    await Task.Delay(waitTimeout, _cts.Token);
-
-                    if (_cts.Token.IsCancellationRequested)
-                    {
-                        return;
-                    }
-
-                    tabListHost = mw.GetRecursiveByName("PART_TabListHost");
-                    if (tabListHost != null)
-                    {
-                        break;
-                    }
-                }
-
-                while (true)
-                {
-                    await Task.Delay(waitTimeout, _cts.Token);
-
-                    if (_cts.Token.IsCancellationRequested)
-                    {
-                        return;
-                    }
-
                     try
                     {
+                        await Task.Delay(waitTimeout, _cts.Token);
+
+                        if (_cts.Token.IsCancellationRequested)
+                        {
+                            return;
+                        }
+
+                        var tabListHost = mw.GetRecursiveByName("PART_TabListHost");
+                        if (tabListHost == null)
+                        {
+                            continue;
+                        }
+
                         var tabs = new List<FrameworkElement>();
                         tabListHost.GetRecursiveByType("DocumentTabItem", ref tabs);
 
