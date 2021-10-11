@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using ColorTabs2019.Options;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.PlatformUI;
@@ -59,6 +60,8 @@ namespace ColorTabs2019
                 var waitTimeout = DefaultWaitTimeout;
                 var mw = Application.Current.MainWindow;
 
+                var disabled = false;
+
                 //search for tab list panel
                 while (true)
                 {
@@ -70,6 +73,18 @@ namespace ColorTabs2019
                         {
                             return;
                         }
+
+                        if (!General.Instance.Enabled)
+                        {
+                            disabled = true;
+                            continue;
+                        }
+
+                        //if (disabled)
+                        //{
+                        //    _headerDict.Clear();
+                        //    disabled = false;
+                        //}
 
                         var tabListHost = mw.GetRecursiveByName("PART_TabListHost");
                         if (tabListHost == null)
