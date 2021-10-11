@@ -1,7 +1,7 @@
-﻿using Community.VisualStudio.Toolkit;
-using System.ComponentModel;
+﻿using System.ComponentModel;
+using Community.VisualStudio.Toolkit;
 
-namespace ColorTabs2019
+namespace ColorTabs2019.Options
 {
     internal partial class OptionsProvider
     {
@@ -16,5 +16,12 @@ namespace ColorTabs2019
         [Description("Foreground color for tab name (ARGB in hex).")]
         [DefaultValue("FFFFFFFF")]
         public string Foreground { get; set; } = "FFFFFFFF";
+
+        [Category("General")]
+        [DisplayName("Enabled")]
+        [Description("Disable this extension if it harms you IDE")]
+        [DefaultValue(true)]
+        public bool Enabled { get; set; } = true;
+
     }
 }
