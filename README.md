@@ -10,7 +10,7 @@ This Vsix will add a colored rectangle left of your tab name. Color is based on 
 
 Colored rectangles will be visible only if you are using a left/right layout for the tab panel. Top layout does not support yet.
 
-You can change a foreground for tab names in VS settings/Color Tabs 2019 to bring it to accordance of you VS theme.
+You can change a foreground for tab names in VS settings/Color Tabs 2019 to bring it to accordance of your VS theme.
 
 
 I DO NOT test it against:
