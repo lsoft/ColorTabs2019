@@ -3,7 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Windows;
@@ -115,12 +117,15 @@ namespace ColorTabs2019
                                 //check for its title updated
                                 if (_headerDict.TryGetValue(tabItem, out var header))
                                 {
-                                    var headerTextBlock = ((tabItem.Header as StackPanel).Children[1] as TextBlock);
-                                    var ourTitle = headerTextBlock.Text;
-                                    var originalHeader = GetTabTile(header);
-                                    if (ourTitle != originalHeader)
+                                    var headerTextBlock = ((tabItem.Header as StackPanel).Children[2] as TextBlock);
+                                    if (headerTextBlock != null)
                                     {
-                                        headerTextBlock.Text = originalHeader;
+                                        var ourTitle = headerTextBlock.Text;
+                                        var originalHeader = GetTabTile(header);
+                                        if (ourTitle != originalHeader)
+                                        {
+                                            headerTextBlock.Text = originalHeader;
+                                        }
                                     }
                                 }
 
@@ -142,9 +147,18 @@ namespace ColorTabs2019
                                     {
                                         HorizontalAlignment = HorizontalAlignment.Left,
                                         VerticalAlignment = VerticalAlignment.Stretch,
-                                        Fill = new SolidColorBrush(_colorProvider.DetermineColor(tabItem)),
+                                        Fill = new SolidColorBrush(_colorProvider.DetermineColor(tabItem).Item1),
                                         Height = 10,
                                         Width = 10,
+                                        Margin = new Thickness(0)
+                                    },
+                                    new Rectangle
+                                    {
+                                        HorizontalAlignment = HorizontalAlignment.Left,
+                                        VerticalAlignment = VerticalAlignment.Stretch,
+                                        Fill = new SolidColorBrush(_colorProvider.DetermineColor(tabItem).Item2),
+                                        Height = 10,
+                                        Width = 5,
                                         Margin = new Thickness(0)
                                     },
                                     new TextBlock
@@ -258,7 +272,7 @@ namespace ColorTabs2019
 
         private readonly ConcurrentDictionary<string, Color> _dict = new();
 
-        public Color DetermineColor(TabItem tabItem)
+        public (Color, Color) DetermineColor(TabItem tabItem)
         {
             var grid = tabItem.GetRecursiveByName("TitlePanel") as Grid;
             if (grid != null)
@@ -272,34 +286,60 @@ namespace ColorTabs2019
                     if (parts.Length == 5)
                     {
                         var csprojPath = parts[1];
+                        var filePath = parts[2];
 
-                        if (_dict.TryGetValue(csprojPath, out var color))
+                        Color folderColor = Colors.Transparent;
+                        if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
                         {
-                            return color;
+                            var folderPath = new FileInfo(filePath).Directory?.FullName;
+                            if (!string.IsNullOrEmpty(folderPath))
+                            {
+                                folderColor = GetRandomColor(folderPath);
+                            }
+                        }
+
+                        if (_dict.TryGetValue(csprojPath, out var projectColor))
+                        {
+                            return (projectColor, folderColor);
                         }
 
                         if (_dict.Count < _colors.Length)
                         {
-                            color = _colors[_dict.Count].ToColorFromRgb();
+                            projectColor = _colors[_dict.Count].ToColorFromRgb();
                         }
                         else
                         {
                             //enable randomizer
-                            var hashcode = csprojPath.GetHashCode();
-                            var a = (byte)255;
-                            var r = (byte)((hashcode & 0x00ff0000) >> 16);
-                            var g = (byte)((hashcode & 0x0000ff00) >> 8);
-                            var b = (byte)((hashcode & 0x000000ff) >> 0);
-                            color = Color.FromArgb(a, r, g, b);
+                            projectColor = GetRandomColor(csprojPath);
                         }
 
-                        _dict[csprojPath] = color;
-                        return color;
+                        _dict[csprojPath] = projectColor;
+                        return (projectColor, folderColor);
                     }
                 }
             }
 
-            return Colors.Transparent;
+            return (Colors.Transparent, Colors.Transparent);
+        }
+
+        private static Color GetRandomColor(
+            string s
+            )
+        {
+            using (var md5 = MD5.Create())
+            {
+                md5.Initialize();
+                md5.ComputeHash(Encoding.UTF8.GetBytes(s));
+                var hashcode = md5.Hash;
+
+                var a = (byte)255;
+                var r = hashcode[0];
+                var g = hashcode[1];
+                var b = hashcode[2];
+                var color = Color.FromArgb(a, r, g, b);
+
+                return color;
+            }
         }
 
         public void Reset()
