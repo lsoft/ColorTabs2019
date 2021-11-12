@@ -157,8 +157,8 @@ namespace ColorTabs2019
                                         HorizontalAlignment = HorizontalAlignment.Left,
                                         VerticalAlignment = VerticalAlignment.Stretch,
                                         Fill = new SolidColorBrush(_colorProvider.DetermineColor(tabItem).Item2),
-                                        Height = General.Instance.SecondaryColorEnabled ? 10 : 0,
-                                        Width = 5,
+                                        Height = 10,
+                                        Width = General.Instance.SecondaryColorEnabled ? 5 : 0,
                                         Margin = new Thickness(0)
                                     },
                                     new TextBlock
