@@ -11,7 +11,7 @@ namespace ColorTabs2019
         public const string Name = "Color Tabs 2019";
         public const string Description = @"Color Tabs Extension for Visual Studio 2019.";
         public const string Language = "en-US";
-        public const string Version = "1.6";
+        public const string Version = "1.7";
         public const string Author = "lsoft";
         public const string Tags = "";
     }

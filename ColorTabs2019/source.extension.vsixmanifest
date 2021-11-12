@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="ColorTabs2019.25f93d89-e99f-4dc7-bbfc-fe37aaaad86e" Version="1.6" Language="en-US" Publisher="lsoft" />
+        <Identity Id="ColorTabs2019.25f93d89-e99f-4dc7-bbfc-fe37aaaad86e" Version="1.7" Language="en-US" Publisher="lsoft" />
         <DisplayName>Color Tabs 2019</DisplayName>
         <Description xml:space="preserve">Color Tabs Extension for Visual Studio 2019.</Description>
         <MoreInfo>https://github.com/lsoft/ColorTabs2019</MoreInfo>

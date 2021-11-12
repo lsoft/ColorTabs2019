@@ -23,5 +23,11 @@ namespace ColorTabs2019.Options
         [DefaultValue(true)]
         public bool Enabled { get; set; } = true;
 
+        [Category("General")]
+        [DisplayName("Secondary color")]
+        [Description("Control to show or not to show a secondary (folder) color rectangle")]
+        [DefaultValue(true)]
+        public bool SecondaryColorEnabled { get; set; } = true;
+
     }
 }
